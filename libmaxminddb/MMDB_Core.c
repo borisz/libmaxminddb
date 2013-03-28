@@ -34,6 +34,7 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
 LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
                 char *src_key);
 
+LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags);
 LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode);
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
@@ -385,23 +386,31 @@ LOCAL int fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
+void free_mmdb(MMDB_s * mmdb)
+{
+    if (mmdb) {
+        if (mmdb->fname) {
+            free(mmdb->fname);
+            mmdb->fname = NULL;
+        }
+        if (mmdb->fd >= 0) {
+            close(mmdb->fd);
+            mmdb->fd = -1;
+        }
+        if (mmdb->file_in_mem_ptr) {
+            free((void *)mmdb->file_in_mem_ptr);
+            mmdb->file_in_mem_ptr = NULL;
+        } else if (mmdb->meta_data_content) {
+            free(mmdb->meta_data_content);
+            mmdb->meta_data_content = NULL;
+        }
+    }
+}
+
 void MMDB_free_all(MMDB_s * mmdb)
 {
     if (mmdb) {
-        if (mmdb->fname)
-            free(mmdb->fname);
-        if (mmdb->fd >= 0)
-            close(mmdb->fd);
-        if (mmdb->file_in_mem_ptr)
-            free((void *)mmdb->file_in_mem_ptr);
-        else if (mmdb->meta_data_content) {
-            free(mmdb->meta_data_content);
-        }
-#if 0
-        if (mmdb->fake_metadata_db) {
-            free(mmdb->fake_metadata_db);
-        }
-#endif
+        free_mmdb(mmdb);
         free((void *)mmdb);
     }
 }
@@ -662,6 +671,51 @@ LOCAL void decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
     return;
 }
 
+LOCAL int want_update_cache(MMDB_s * mmdb)
+{
+    if (mmdb->flags & MMDB_FLAG_CHECK_CACHE) {
+        struct timeval tv;
+        struct stat buf;
+        gettimeofday(&tv, NULL);
+        if (tv.tv_sec == mmdb->last_mtime_check)
+            return MMDB_FALSE;  // no need to update
+        mmdb->last_mtime_check = tv.tv_sec;
+
+        if (stat(mmdb->fname, &buf) != -1) {
+
+            /* make sure the file is not touched for at least 60 seconds */
+            if (buf.st_mtime != mmdb->mtime
+                && (buf.st_mtime + 60 < mmdb->last_mtime_check)) {
+                return MMDB_TRUE;
+            }
+        }
+    }
+    return MMDB_FALSE;
+}
+
+LOCAL int update_cache(MMDB_s * mmdb)
+{
+    MMDB_DBG_CARP("update_cache");
+
+    if (!want_update_cache(mmdb))
+        return MMDB_SUCCESS;
+
+    MMDB_DBG_CARP("update_cache: Yes try to update the cache");
+
+    char *fname = strdup(mmdb->fname);
+    if (fname == NULL)
+        return MMDB_OUTOFMEMORY;
+    int flags = mmdb->flags;
+    free_mmdb(mmdb);
+    int err = init(mmdb, fname, flags);
+    free(fname);
+    if (err != MMDB_SUCCESS) {
+        MMDB_free_all(mmdb);
+        return err;
+    }
+    return MMDB_SUCCESS;
+}
+
 LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
 {
     struct stat s;
@@ -678,6 +732,9 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
         return MMDB_OPENFILEERROR;
     fstat(fd, &s);
     mmdb->flags = flags;
+    mmdb->mtime = mmdb->last_mtime_check = s.st_mtime;
+    mmdb->size = s.st_size;
+
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
         mmdb->fd = -1;
         size = s.st_size;

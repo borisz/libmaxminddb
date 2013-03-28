@@ -9,7 +9,8 @@ extern "C" {
 //#include <sys/socket.h>
 #include <netinet/in.h>
 //#include <arpa/inet.h>
-
+#include <sys/stat.h>           /* for fstat */
+#include <sys/time.h>
 // *** the EXT_TYPE is wrong it should be type - 8 not type
 #define BROKEN_TYPE (1)
 // every pointer start at the MAX + 1 of the previous type. To extend the range
@@ -40,6 +41,8 @@ extern "C" {
 #define MMDB_MODE_MEMORY_CACHE (2)
 #define MMDB_MODE_MASK (7)
 
+#define MMDB_FLAG_CHECK_CACHE (8)
+
 /* GEOIPDB err codes */
 #define MMDB_SUCCESS (0)
 #define MMDB_OPENFILEERROR (-1)
@@ -63,6 +66,9 @@ extern "C" {
 #define MMDB_DBG_ASSERT(ex)
 #endif
 
+#define INC_LOCK(mmdb) __sync_add_and_fetch(&mmdb->lock_cnt,1)
+#define DEC_LOCK(mmdb) __sync_sub_and_fetch(&mmdb->lock_cnt,1)
+
 // This is the starting point for every search.
 // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
@@ -83,7 +89,11 @@ extern "C" {
     typedef struct MMDB_s {
         uint32_t flags;
         int fd;
+        volatile int lock_cnt;
         char *fname;
+        off_t size;
+        time_t mtime;
+        time_t last_mtime_check;
         const uint8_t *file_in_mem_ptr;
         int major_file_format;
         int minor_file_format;
