@@ -4,19 +4,19 @@ AM_CPPFLAGS =      \
 noinst_PROGRAMS = version_t open_t lookup_t dump_t dump_meta_t
 
 version_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
-version_t_SOURCES = version_t.c tap.c
+version_t_SOURCES = version_t.c tap.c test_helper.c
 
 open_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
-open_t_SOURCES = open_t.c tap.c
+open_t_SOURCES = open_t.c tap.c test_helper.c
 
 lookup_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
-lookup_t_SOURCES = lookup_t.c tap.c
+lookup_t_SOURCES = lookup_t.c tap.c test_helper.c
 
 dump_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
-dump_t_SOURCES = dump_t.c tap.c
+dump_t_SOURCES = dump_t.c tap.c  test_helper.c
 
 dump_meta_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
-dump_meta_t_SOURCES = dump_meta_t.c tap.c
+dump_meta_t_SOURCES = dump_meta_t.c tap.c test_helper.c
 
 lookup_t.lo lookup_t.o: lookup_t.c
 
@@ -29,4 +29,6 @@ dump_t.lo dump_t.o: dump_t.c
 dump_meta_t.lo dump_meta_t.o: dump_meta_t.c
 
 tap.lo tap.o: tap.c
+
+test_helper.lo test_helper.o: test_helper.c
 
