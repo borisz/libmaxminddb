@@ -2,6 +2,7 @@ AM_CPPFLAGS =      \
         -I$(top_srcdir)/libmaxminddb
 
 bin_PROGRAMS = mmdblookup mmdbdump country_lookup
+EXTRA_DIST = MMDB_Helper.h
 
 mmdblookup_DEPENDENCIES = $(top_builddir)/libmaxminddb/libmaxminddb.la
 mmdblookup_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la -lc

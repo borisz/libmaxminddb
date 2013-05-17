@@ -2,6 +2,7 @@ AM_CPPFLAGS =      \
         -I$(top_srcdir)/libmaxminddb
 
 noinst_PROGRAMS = version_t open_t lookup_v4_t lookup_t dump_t dump_meta_t
+EXTRA_DIST = test_helper.h data/test-database.dat data/v4-28.mmdb
 
 version_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
 version_t_SOURCES = version_t.c tap.c test_helper.c
