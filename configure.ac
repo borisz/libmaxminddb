@@ -3,8 +3,11 @@
 
 AC_PREREQ([2.65])
 AC_INIT([libmaxminddb], [0.2], [support@maxmind.com])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([libmaxminddb/MMDB.h])
 AC_CONFIG_HEADERS([config.h])
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
+
 
 LT_INIT
 AM_INIT_AUTOMAKE
@@ -30,4 +33,5 @@ AC_CONFIG_FILES([Makefile
                  libmaxminddb/Makefile
 		 apps/Makefile
 		 t/Makefile])
+AC_PROG_AWK
 AC_OUTPUT
