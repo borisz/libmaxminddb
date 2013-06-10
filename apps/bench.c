@@ -54,7 +54,7 @@ int main(int argc, char *const argv[])
     gettimeofday(&tv_start, NULL);
 
     int ai_family = is_ipv4(mmdb) ? AF_INET : AF_INET6;
-    int ai_flags = AI_V4MAPPED|AI_NUMERICHOST; // accept everything
+    int ai_flags = AI_V4MAPPED | AI_NUMERICHOST;        // accept everything
 
     int count = 1000000;
 
@@ -65,17 +65,19 @@ int main(int argc, char *const argv[])
             exit(1);
         }
 
-       MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+        MMDB_root_entry_s root = {.entry.mmdb = mmdb };
         int status = is_ipv4(mmdb)
             ? MMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)
             : MMDB_lookup_by_ipnum_128(ip.v6, &root);
-    
-       MMDB_decode_all_s *decode_all;
-       status = MMDB_get_tree(&root.entry, &decode_all);
-        assert (status == MMDB_SUCCESS);
 
-        MMDB_free_decode_all(decode_all);
- }
+        if (status == MMDB_SUCCESS && root.entry.offset > 0) {
+            MMDB_decode_all_s *decode_all;
+            status = MMDB_get_tree(&root.entry, &decode_all);
+            assert(status == MMDB_SUCCESS);
+
+            MMDB_free_decode_all(decode_all);
+        }
+    }
 
     gettimeofday(&tv_stop, NULL);
     double reqs_sec =
@@ -83,8 +85,6 @@ int main(int argc, char *const argv[])
                  - ((double)tv_start.tv_sec + tv_start.tv_usec / 1000000.0));
 
     printf("reqs/sec %.2f\n", reqs_sec);
-
-
 
 #if 0
     if (status == MMDB_SUCCESS) {
