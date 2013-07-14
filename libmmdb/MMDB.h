@@ -139,6 +139,9 @@ extern "C" {
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
                                         MMDB_root_entry_s * result);
 
+    extern int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
+                               va_list params);
+
     extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
                               ...);
     extern int MMDB_strcmp_result(MMDB_s * mmdb,
