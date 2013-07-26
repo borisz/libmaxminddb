@@ -192,14 +192,14 @@ LOCAL char *bytesdup(MMDB_return_s const *const ret)
 int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
                        char *str)
 {
-        if (result->offset > 0) {
-            char *str1 = bytesdup(result);
-            int ret = strcmp(str1, str);
-            if (str1)
-                free(str1);
-            return ret;
-        }
-        return 1;
+    if (result->offset > 0) {
+        char *str1 = bytesdup(result);
+        int ret = strcmp(str1, str);
+        if (str1)
+            free(str1);
+        return ret;
+    }
+    return 1;
 }
 
 LOCAL int get_ext_type(int raw_ext_type)
@@ -227,10 +227,7 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->fd >= 0)
             close(mmdb->fd);
         if (mmdb->file_in_mem_ptr)
-            free((void *)mmdb->file_in_mem_ptr);
-        else if (mmdb->meta_data_content) {
-            free(mmdb->meta_data_content);
-        }
+            munmap(mmdb->file_in_mem_ptr);
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
@@ -358,29 +355,22 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     if (mmdb->fname == NULL)
         return MMDB_OUTOFMEMORY;
     mmdb->fd = fd = open(fname, O_RDONLY);
+
     if (fd < 0)
         return MMDB_OPENFILEERROR;
     fstat(fd, &s);
     mmdb->flags = flags;
-    if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-        mmdb->fd = -1;
-        size = s.st_size;
-        offset = 0;
-    } else {
-        mmdb->fd = fd;
-        size = s.st_size < 2000 ? s.st_size : 2000;
-        offset = s.st_size - size;
-    }
-    ptr = mmdb->meta_data_content = malloc(size);
+    size = s.st_size;
+    offset = 0;
+    ptr = mmdb->meta_data_content =
+        mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
+
     if (ptr == NULL)
         return MMDB_INVALIDDATABASE;
 
-    if (MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset))
-        return MMDB_IOERROR;
-
-    const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
+    const uint8_t *metadata =
+        memmem(ptr + size - 4096, 4096, "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
-        free(mmdb->meta_data_content);
         mmdb->meta_data_content = NULL;
         return MMDB_INVALIDDATABASE;
     }
@@ -407,17 +397,9 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     mmdb->depth =
         get_uint_value(&mmdb->meta, KEYS("ip_version")) == 4 ? 32 : 128;
 
-    if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-        mmdb->file_in_mem_ptr = ptr;
-        mmdb->dataptr =
-            mmdb->file_in_mem_ptr +
-            mmdb->node_count * mmdb->full_record_size_bytes;
-        close(fd);
-    } else {
-        mmdb->dataptr =
-            (const uint8_t *)0 +
-            (mmdb->node_count * mmdb->full_record_size_bytes);
-    }
+    mmdb->file_in_mem_ptr = ptr;
+    mmdb->dataptr =
+        mmdb->file_in_mem_ptr + mmdb->node_count * mmdb->full_record_size_bytes;
 
     // Success - but can we handle the data?
     if (mmdb->major_file_format != 2) {
