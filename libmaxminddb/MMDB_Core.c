@@ -147,26 +147,6 @@ LOCAL int get_sintX(const uint8_t * p, int length)
     return (int)get_uintX(p, length);
 }
 
-LOCAL int int_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
-{
-    while (to_read > 0) {
-        ssize_t have_read = pread(fd, buffer, to_read, offset);
-        if (have_read <= 0)
-            return MMDB_IOERROR;
-        to_read -= have_read;
-        if (to_read == 0)
-            break;
-        offset += have_read;
-        buffer += have_read;
-    }
-    return MMDB_SUCCESS;
-}
-
-int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
-{
-    return int_pread(fd, buffer, to_read, offset);
-}
-
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size)
 {
@@ -610,12 +590,7 @@ LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
     uint8_t str[256];
     int len = data->data_size > 255 ? 255 : data->data_size;
 
-    if (mmdb && mmdb->fd >= 0) {
-        uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-        int_pread(mmdb->fd, str, len, segments + (uintptr_t) data->ptr);
-    } else {
-        memcpy(str, data->ptr, len);
-    }
+    memcpy(str, data->ptr, len);
 
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
