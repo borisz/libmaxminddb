@@ -242,7 +242,7 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->fname)
             free(mmdb->fname);
         if (mmdb->file_in_mem_ptr)
-            munmap(mmdb->file_in_mem_ptr, mmdb->size);
+            munmap((void *)mmdb->file_in_mem_ptr, mmdb->size);
         if (mmdb->fd >= 0)
             close(mmdb->fd);
         if (mmdb->fake_metadata_db) {
@@ -386,9 +386,8 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
         return MMDB_INVALIDDATABASE;
 
     int max_metasize = size > 4096 ? 4096 : size;
-    const uint8_t *metadata =
-        memmem(ptr + size - max_metasize, max_metasize,
-               "\xab\xcd\xefMaxMind.com", 14);
+    const uint8_t *metadata = memmem(ptr + size - max_metasize, max_metasize,
+                                     "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
         mmdb->meta_data_content = NULL;
         return MMDB_INVALIDDATABASE;
