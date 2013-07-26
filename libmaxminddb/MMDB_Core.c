@@ -775,3 +775,107 @@ void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
         MMDB_free_decode_all(freeme->next);
     free(freeme);
 }
+
+LOCAL void decode_one_follow(MMDB_s * mmdb, uint32_t offset,
+                             MMDB_decode_s * decode)
+{
+    decode_one(mmdb, offset, decode);
+    if (decode->data.type == MMDB_DTYPE_PTR)
+        decode_one(mmdb, decode->data.uinteger, decode);
+}
+
+int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
+                    va_list params)
+{
+    MMDB_decode_s decode, key, value;
+    MMDB_s *mmdb = start->mmdb;
+    uint32_t offset = start->offset;
+    char *src_key;              // = va_arg(params, char *);
+    int src_keylen;
+    while ((src_key = va_arg(params, char *))) {
+        MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
+        decode_one(mmdb, offset, &decode);
+ donotdecode:
+        src_keylen = strlen(src_key);
+        switch (decode.data.type) {
+        case MMDB_DTYPE_PTR:
+            // we follow the pointer
+            decode_one(mmdb, decode.data.uinteger, &decode);
+            break;
+
+            // learn to skip this
+        case MMDB_DTYPE_ARRAY:
+            {
+                int size = decode.data.data_size;
+                int offset = strtol(src_key, NULL, 10);
+                if (offset >= size || offset < 0) {
+                    result->offset = 0; // not found.
+                    goto end;
+                }
+                for (int i = 0; i < offset; i++) {
+                    decode_one(mmdb, decode.offset_to_next, &decode);
+                    skip_hash_array(mmdb, &decode);
+                }
+                if ((src_key = va_arg(params, char *))) {
+                    decode_one_follow(mmdb, decode.offset_to_next, &decode);
+                    offset = decode.offset_to_next;
+                    goto donotdecode;
+                }
+                decode_one_follow(mmdb, decode.offset_to_next, &value);
+                memcpy(result, &value.data, sizeof(MMDB_return_s));
+                goto end;
+            }
+            break;
+        case MMDB_DTYPE_MAP:
+            {
+                int size = decode.data.data_size;
+                // printf("decode hash with %d keys\n", size);
+                offset = decode.offset_to_next;
+                while (size-- > 0) {
+                    decode_one(mmdb, offset, &key);
+
+                    uint32_t offset_to_value = key.offset_to_next;
+
+                    if (key.data.type == MMDB_DTYPE_PTR) {
+                        // while (key.data.type == MMDB_DTYPE_PTR) {
+                        decode_one(mmdb, key.data.uinteger, &key);
+                        // }
+                    }
+
+                    assert(key.data.type == MMDB_DTYPE_BYTES ||
+                           key.data.type == MMDB_DTYPE_UTF8_STRING);
+
+                    if (key.data.data_size == src_keylen &&
+                        !memcmp(src_key, key.data.ptr, src_keylen)) {
+                        if ((src_key = va_arg(params, char *))) {
+                            // DPRINT_KEY(&key.data);
+                            decode_one_follow(mmdb, offset_to_value, &decode);
+                            offset = decode.offset_to_next;
+
+                            goto donotdecode;
+                        }
+                        // found it!
+                        decode_one_follow(mmdb, offset_to_value, &value);
+                        memcpy(result, &value.data, sizeof(MMDB_return_s));
+                        goto end;
+                    } else {
+                        // we search for another key skip  this
+                        decode_one(mmdb, offset_to_value, &value);
+                        skip_hash_array(mmdb, &value);
+                        offset = value.offset_to_next;
+                    }
+                }
+                // not found!! do something
+                //DPRINT_KEY(&key.data);
+                //
+                result->offset = 0;     // not found.
+                goto end;
+            }
+        default:
+            break;
+        }
+    }
+ end:
+    va_end(params);
+    return MMDB_SUCCESS;
+}
