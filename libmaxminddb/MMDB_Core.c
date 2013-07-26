@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
-
+#include <sys/mman.h>
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -227,7 +227,7 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->fd >= 0)
             close(mmdb->fd);
         if (mmdb->file_in_mem_ptr)
-            munmap(mmdb->file_in_mem_ptr);
+            munmap(mmdb->file_in_mem_ptr, mmdb->size);
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
@@ -360,7 +360,7 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
         return MMDB_OPENFILEERROR;
     fstat(fd, &s);
     mmdb->flags = flags;
-    size = s.st_size;
+    mmdb->size = size = s.st_size;
     offset = 0;
     ptr = mmdb->meta_data_content =
         mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);

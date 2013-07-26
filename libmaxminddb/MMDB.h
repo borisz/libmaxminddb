@@ -88,6 +88,7 @@ extern "C" {
     typedef struct MMDB_s {
         uint32_t flags;
         int fd;
+        int size;               // file size
         char *fname;
         const uint8_t *file_in_mem_ptr;
         int major_file_format;
@@ -112,7 +113,7 @@ extern "C" {
             uint32_t uinteger;
             uint8_t c8[8];
             uint8_t c16[16];
-	    const void* ptr;
+            const void *ptr;
         };
         uint32_t offset;        /* start of our field or zero for not found */
         int data_size;          /* only valid for strings, utf8_strings or binary data */
@@ -138,7 +139,6 @@ extern "C" {
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
                                         MMDB_root_entry_s * result);
 
-
     extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
                               ...);
     extern int MMDB_strcmp_result(MMDB_s * mmdb,
@@ -146,7 +146,8 @@ extern "C" {
 
     extern const char *MMDB_lib_version(void);
 
-    extern int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all, int indent);
+    extern int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+                         int indent);
     extern int MMDB_get_tree(MMDB_entry_s * start,
                              MMDB_decode_all_s ** decode_all);
     extern MMDB_decode_all_s *MMDB_alloc_decode_all(void);
