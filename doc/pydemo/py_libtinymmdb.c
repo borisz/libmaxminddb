@@ -224,7 +224,7 @@ static PyTypeObject TMMDB_MMDBType = {
 
 static PyMethodDef TMMDB_Class_methods[] = {
     {"new", TMMDB_new_Py, 1,
-     "MMDB Constructor with database filename argument"},
+     "TMMDB Constructor with database filename argument"},
     {"lib_version", TMMDB_lib_version_Py, 1, "Returns the CAPI version"},
     {NULL, NULL, 0, NULL}
 };
