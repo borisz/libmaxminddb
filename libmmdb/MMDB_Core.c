@@ -369,8 +369,9 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     if (ptr == NULL)
         return MMDB_INVALIDDATABASE;
 
+    int max_metasize = size > 4096 ? 4096 : size;
     const uint8_t *metadata =
-        memmem(ptr + size - 4096, 4096, "\xab\xcd\xefMaxMind.com", 14);
+        memmem(ptr + size - max_metasize, max_metasize, "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
         mmdb->meta_data_content = NULL;
         return MMDB_INVALIDDATABASE;
