@@ -212,8 +212,6 @@ LOCAL char *bytesdup(MMDB_return_s const *const ret)
 int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
                        char *str)
 {
-    if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-
         if (result->offset > 0) {
             char *str1 = bytesdup(result);
             int ret = strcmp(str1, str);
@@ -222,10 +220,6 @@ int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
             return ret;
         }
         return 1;
-    }
-
-    return fdcmp(mmdb, result, str);
-
 }
 
 LOCAL int get_ext_type(int raw_ext_type)
@@ -282,9 +276,6 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
 
-    if (mmdb->fd >= 0)
-        return MMDB_fdlookup_by_ipnum_128(ipnum, result);
-
     int segments = mmdb->node_count;
     uint32_t offset = 0;
     int rl = mmdb->full_record_size_bytes;
@@ -334,9 +325,6 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     MMDB_DBG_CARP("MMDB_lookup_by_ipnum{mmdb} fd:%d depth:%d node_count:%d\n",
                   mmdb->fd, mmdb->depth, mmdb->node_count);
     MMDB_DBG_CARP("MMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
-
-    if (mmdb->fd >= 0)
-        return MMDB_fdlookup_by_ipnum(ipnum, res);
 
     int segments = mmdb->node_count;
     uint32_t offset = 0;
@@ -504,11 +492,6 @@ LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...)
 
 LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
-
-    if (mmdb->fd >= 0) {
-        fddecode_one(mmdb, offset, decode);
-        return;
-    }
 
     const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl;
