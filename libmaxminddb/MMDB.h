@@ -155,8 +155,6 @@ extern "C" {
     extern int MMDB_lookupaddressX(const char *host, int ai_family,
                                    int ai_flags, void *ip);
 
-    extern int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read,
-                                off_t offset);
 #ifdef __cplusplus
 }
 #endif
