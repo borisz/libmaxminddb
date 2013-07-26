@@ -382,7 +382,7 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     ptr = mmdb->meta_data_content =
         mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
 
-    if (ptr == NULL)
+    if (ptr == MAP_FAILED)
         return MMDB_INVALIDDATABASE;
 
     int max_metasize = size > 4096 ? 4096 : size;
