@@ -193,11 +193,12 @@ int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
                        char *str)
 {
     if (result->offset > 0) {
-        char *str1 = bytesdup(result);
-        int ret = strcmp(str1, str);
-        if (str1)
-            free(str1);
-        return ret;
+        const char *p = result->ptr;
+        for (int i = 0; i < result->data_size; i++) {
+            if (p[i] != str[i])
+                return 1;
+        }
+        return 0;
     }
     return 1;
 }
@@ -573,7 +574,6 @@ LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
     int len = data->data_size > 255 ? 255 : data->data_size;
 
     memcpy(str, data->ptr, len);
-
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
 }
