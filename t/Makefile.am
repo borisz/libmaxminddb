@@ -1,5 +1,5 @@
 AM_CPPFLAGS =      \
-        -I$(top_srcdir)/libmaxminddb
+        -I$(top_srcdir)/libmmdb
 
 noinst_PROGRAMS = version_t open_t lookup_t dump_t dump_meta_t endian_size_t
 
@@ -7,22 +7,22 @@ TESTS_ENVIRONMENT = export MMDB_TEST_DATABASE=$(srcdir)/data/v6-28.mmdb;
 TESTS = version_t open_t lookup_t dump_t dump_meta_t endian_size_t
 // AM_TESTS_FD_REDIRECT = 9>&2
 
-version_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
+version_t_LDADD = $(top_builddir)/libmmdb/libmmdb.la
 version_t_SOURCES = version_t.c tap.c test_helper.c
 
-open_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
+open_t_LDADD = $(top_builddir)/libmmdb/libmmdb.la
 open_t_SOURCES = open_t.c tap.c test_helper.c
 
-lookup_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
+lookup_t_LDADD = $(top_builddir)/libmmdb/libmmdb.la
 lookup_t_SOURCES = lookup_t.c tap.c test_helper.c
 
-dump_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
+dump_t_LDADD = $(top_builddir)/libmmdb/libmmdb.la
 dump_t_SOURCES = dump_t.c tap.c  test_helper.c
 
-dump_meta_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
+dump_meta_t_LDADD = $(top_builddir)/libmmdb/libmmdb.la
 dump_meta_t_SOURCES = dump_meta_t.c tap.c test_helper.c
 
-endian_size_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
+endian_size_t_LDADD = $(top_builddir)/libmmdb/libmmdb.la
 endian_size_t_SOURCES = endian_size_t.c tap.c test_helper.c
 
 lookup_t.lo lookup_t.o: lookup_t.c

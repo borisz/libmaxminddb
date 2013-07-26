@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([libmaxminddb], [0.3], [support@maxmind.com])
-AC_CONFIG_SRCDIR([libmaxminddb/MMDB.h])
+AC_INIT([libmmdb], [0.3], [bzm@2bz.de])
+AC_CONFIG_SRCDIR([libmmdb/MMDB.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
@@ -33,10 +33,10 @@ AC_TYPE_UINTPTR_T
 # Checks for library functions.
 
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([memchr strtol memset gettimeofday strdup memmem])
+AC_CHECK_FUNCS([mmap munmap memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
-                 libmaxminddb/Makefile
+                 libmmdb/Makefile
 		 apps/Makefile
 		 t/Makefile])
 AC_OUTPUT
