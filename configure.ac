@@ -33,7 +33,7 @@ AC_TYPE_UINTPTR_T
 # Checks for library functions.
 
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([mmap munmap memchr strtol memset gettimeofday strdup memmem])
+AC_CHECK_FUNCS([abort mmap munmap memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
                  libmmdb/Makefile

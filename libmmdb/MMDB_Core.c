@@ -55,6 +55,22 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
+LOCAL inline void *xcalloc(size_t count, size_t size)
+{
+    void *p = calloc(count, size);
+    if (!p)
+        abort();
+    return p;
+}
+
+LOCAL inline void *xmalloc(size_t size)
+{
+    void *p = malloc(size);
+    if (!p)
+        abort();
+    return p;
+}
+
 int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
@@ -181,7 +197,7 @@ LOCAL char *bytesdup(MMDB_return_s const *const ret)
 {
     char *mem = NULL;
     if (ret->offset) {
-        mem = malloc(ret->data_size + 1);
+        mem = xmalloc(ret->data_size + 1);
         memcpy(mem, ret->ptr, ret->data_size);
         mem[ret->data_size] = '\0';
     }
@@ -371,13 +387,14 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 
     int max_metasize = size > 4096 ? 4096 : size;
     const uint8_t *metadata =
-        memmem(ptr + size - max_metasize, max_metasize, "\xab\xcd\xefMaxMind.com", 14);
+        memmem(ptr + size - max_metasize, max_metasize,
+               "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
         mmdb->meta_data_content = NULL;
         return MMDB_INVALIDDATABASE;
     }
 
-    mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
+    mmdb->fake_metadata_db = xcalloc(1, sizeof(struct MMDB_s));
     mmdb->fake_metadata_db->fd = -1;
     mmdb->fake_metadata_db->dataptr = metadata + 14;
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
@@ -414,7 +431,7 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 MMDB_s *MMDB_open(const char *fname, uint32_t flags)
 {
     MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
-    MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
+    MMDB_s *mmdb = xcalloc(1, sizeof(MMDB_s));
     if (MMDB_SUCCESS != init(mmdb, fname, flags)) {
         free_all(mmdb);
         return NULL;
@@ -757,7 +774,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
 
 MMDB_decode_all_s *MMDB_alloc_decode_all(void)
 {
-    return calloc(1, sizeof(MMDB_decode_all_s));
+    return xcalloc(1, sizeof(MMDB_decode_all_s));
 }
 
 void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
