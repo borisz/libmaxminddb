@@ -203,9 +203,9 @@ static PyTypeObject TMMDB_MMDBType = {
     "MMDB",
     sizeof(TMMDB_MMDBObject),
     0,
-    TMMDB_MMDB_dealloc,         /*tp_dealloc */
+    TMMDB_MMDB_dealloc,          /*tp_dealloc */
     0,                          /*tp_print */
-    (getattrfunc) TMMDB_GetAttr,        /*tp_getattr */
+    (getattrfunc) TMMDB_GetAttr, /*tp_getattr */
     0,                          /*tp_setattr */
     0,                          /*tp_compare */
     0,                          /*tp_repr */

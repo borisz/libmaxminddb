@@ -25,7 +25,7 @@ extern "C" {
 #define TMMDB_DTYPE_BYTES (4)
 #define TMMDB_DTYPE_UINT16 (5)
 #define TMMDB_DTYPE_UINT32 (6)
-#define TMMDB_DTYPE_MAP (7)     /* HASH */
+#define TMMDB_DTYPE_MAP (7)      /* HASH */
 #define TMMDB_DTYPE_INT32 (8)
 #define TMMDB_DTYPE_UINT64 (9)
 #define TMMDB_DTYPE_UINT128 (10)
