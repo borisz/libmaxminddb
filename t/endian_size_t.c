@@ -1,4 +1,4 @@
-#include "MMDB.h"
+#include "tinymmdb.h"
 #include "tap.h"
 #include <string.h>
 #if HAVE_CONFIG_H

@@ -1,4 +1,4 @@
 SUBDIRS = \
-  libmmdb	\
+  libtinymmdb	\
   apps		\
   t

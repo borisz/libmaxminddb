@@ -1,4 +1,4 @@
-#include "MMDB.h"
+#include "tinymmdb.h"
 #include "tap.h"
 #include <sys/stat.h>
 #include <arpa/inet.h>
@@ -13,22 +13,22 @@ int main(void)
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
 
-    MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
-    ok(mmdb != NULL, "MMDB_open successful");
+    TMMDB_s *mmdb = TMMDB_open(fname, TMMDB_MODE_MEMORY_CACHE);
+    ok(mmdb != NULL, "TMMDB_open successful");
     if (mmdb) {
 
-        MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+        TMMDB_root_entry_s root = {.entry.mmdb = mmdb };
         char *ipstr = "24.24.24.24";
         ip_to_num(mmdb, ipstr, &ipnum);
-        err = MMDB_lookup_by_ipnum_128(ipnum.v6, &root);
-        ok(err == MMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
+        err = TMMDB_lookup_by_ipnum_128(ipnum.v6, &root);
+        ok(err == TMMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
         ok(root.entry.offset > 0, "Found something %s good", ipstr);
-        MMDB_decode_all_s *decode_all;
-        int err = MMDB_get_tree(&root.entry, &decode_all);
-        if (err == MMDB_SUCCESS) {
+        TMMDB_decode_all_s *decode_all;
+        int err = TMMDB_get_tree(&root.entry, &decode_all);
+        if (err == TMMDB_SUCCESS) {
             if (decode_all != NULL)
-                MMDB_dump(mmdb, decode_all, 0);
-            MMDB_free_decode_all(decode_all);
+                TMMDB_dump(mmdb, decode_all, 0);
+            TMMDB_free_decode_all(decode_all);
         }
     }
     done_testing();

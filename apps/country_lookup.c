@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "MMDB.h"
-#include "MMDB_Helper.h"
+#include "tinymmdb.h"
+#include "tinymmdb_helper.h"
 #include "getopt.h"
 
 // country lookup is not useful, it is just to see how fast it is compared to
@@ -31,26 +31,26 @@ int main(int argc, char *const argv[])
     argc -= optind;
     argv += optind;
 
-    MMDB_s *mmdb = MMDB_open(fname ? fname : MMDB_DEFAULT_DATABASE,
-                             MMDB_MODE_MEMORY_CACHE);
+    TMMDB_s *mmdb = TMMDB_open(fname ? fname : TMMDB_DEFAULT_DATABASE,
+                             TMMDB_MODE_MEMORY_CACHE);
 
     for (int i = 1; i <= 10000000; i++) {
 
-        MMDB_root_entry_s root = {.entry.mmdb = mmdb };
-//    int err = MMDB_lookup_by_ipnum(404232216, &root);
+        TMMDB_root_entry_s root = {.entry.mmdb = mmdb };
+//    int err = TMMDB_lookup_by_ipnum(404232216, &root);
         uint32_t ipnum = htonl(rand());
-        int err = MMDB_lookup_by_ipnum(ipnum, &root);
-        if (err == MMDB_SUCCESS) {
+        int err = TMMDB_lookup_by_ipnum(ipnum, &root);
+        if (err == TMMDB_SUCCESS) {
             char *name, *code;
             if (root.entry.offset > 0) {
-                MMDB_return_s country;
-                MMDB_get_value(&root.entry, &country, "country", NULL);
-                MMDB_entry_s start = {.mmdb = mmdb,.offset = country.offset };
+                TMMDB_return_s country;
+                TMMDB_get_value(&root.entry, &country, "country", NULL);
+                TMMDB_entry_s start = {.mmdb = mmdb,.offset = country.offset };
                 if (country.offset) {
-                    MMDB_return_s res;
-                    MMDB_get_value(&start, &res, "code", NULL);
+                    TMMDB_return_s res;
+                    TMMDB_get_value(&start, &res, "code", NULL);
                     code = bytesdup(mmdb, &res);
-                    MMDB_get_value(&start, &res, "name", "en", NULL);
+                    TMMDB_get_value(&start, &res, "name", "en", NULL);
                     name = bytesdup(mmdb, &res);
 
 //                    printf( "%u %s %s\n", ipnum , code, name);

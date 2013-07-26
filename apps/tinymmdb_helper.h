@@ -1,6 +1,6 @@
-#ifndef GEODB_HELPER
-#define GEODB_HELPER (1)
-#include "MMDB.h"
+#ifndef TINYMMDB_HELPER
+#define TINYMMDB_HELPER (1)
+#include "tinymmdb.h"
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
@@ -24,9 +24,9 @@
 
 int addr_to_num(char *addr, struct in_addr *result);
 int addr6_to_num(char *addr, struct in6_addr *result);
-char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret);
-void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo);
-void dump_meta(MMDB_s * mmdb);
+char *bytesdup(TMMDB_s * mmdb, TMMDB_return_s const *const ret);
+void dump_ipinfo(const char *ipstr, TMMDB_root_entry_s * ipinfo);
+void dump_meta(TMMDB_s * mmdb);
 void usage(char *prg);
-int is_ipv4(MMDB_s * mmdb);
+int is_ipv4(TMMDB_s * mmdb);
 #endif

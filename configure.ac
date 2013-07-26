@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([libmmdb], [0.3], [bzm@2bz.de])
-AC_CONFIG_SRCDIR([libmmdb/MMDB.h])
+AC_INIT([libtinymmdb], [0.3], [bzm@2bz.de])
+AC_CONFIG_SRCDIR([libtinymmdb/tinymmdb.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
@@ -39,7 +39,7 @@ AC_C_INLINE
 AC_CHECK_FUNCS([abort munmap memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
-                 libmmdb/Makefile
+                 libtinymmdb/Makefile
 		 apps/Makefile
 		 t/Makefile])
 AC_OUTPUT
