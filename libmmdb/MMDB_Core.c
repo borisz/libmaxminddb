@@ -225,10 +225,10 @@ LOCAL void free_all(MMDB_s * mmdb)
     if (mmdb) {
         if (mmdb->fname)
             free(mmdb->fname);
-        if (mmdb->fd >= 0)
-            close(mmdb->fd);
         if (mmdb->file_in_mem_ptr)
             munmap(mmdb->file_in_mem_ptr, mmdb->size);
+        if (mmdb->fd >= 0)
+            close(mmdb->fd);
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
