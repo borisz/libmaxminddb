@@ -6,7 +6,6 @@
 
 staticforward PyTypeObject TMMDB_MMDBType;
 static PyObject *mkobj_r(TMMDB_s * mmdb, TMMDB_decode_all_s ** current);
-
 /* Exception object for python */
 static PyObject *PyMMDBError;
 
@@ -14,7 +13,6 @@ typedef struct {
     PyObject_HEAD               /* no semicolon */
     TMMDB_s * mmdb;
 } TMMDB_MMDBObject;
-
 // Create a new Python MMDB object
 static PyObject *TMMDB_new_Py(PyObject * self, PyObject * args)
 {

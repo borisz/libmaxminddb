@@ -146,7 +146,6 @@ extern "C" {
     extern int TMMDB_strcmp_result(TMMDB_s * mmdb,
                                    TMMDB_return_s const *const result,
                                    char *str);
-
     extern const char *TMMDB_lib_version(void);
 
     extern int TMMDB_dump(TMMDB_s * mmdb, TMMDB_decode_all_s * decode_all,
