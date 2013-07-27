@@ -99,39 +99,13 @@ static PyObject *TMMDB_lookup_Py(PyObject * self, PyObject * args)
 static PyObject *build_PyString_FromStringAndSize(TMMDB_s * mmdb, void *ptr,
                                                   int size)
 {
-    const int BSIZE = 256;
-    char buffer[BSIZE];
-    int fd = mmdb->fd;
-    if (fd < 0)
         return PyString_FromStringAndSize(ptr, size);
-
-    void *bptr = size < BSIZE ? buffer : malloc(size);
-    assert(bptr);
-    uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-    TMMDB_pread(fd, bptr, size, segments + (uintptr_t) ptr);
-    PyObject *py = PyString_FromStringAndSize(bptr, size);
-    if (size >= BSIZE)
-        free(bptr);
-    return py;
 }
 
 // minor helper fuction to create a python string from the database
 static PyObject *build_PyUnicode_DecodeUTF8(TMMDB_s * mmdb, void *ptr, int size)
 {
-    const int BSIZE = 256;
-    char buffer[BSIZE];
-    int fd = mmdb->fd;
-    if (fd < 0)
         return PyUnicode_DecodeUTF8(ptr, size, NULL);
-
-    void *bptr = size < BSIZE ? buffer : malloc(size);
-    assert(bptr);
-    uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-    TMMDB_pread(fd, bptr, size, segments + (uintptr_t) ptr);
-    PyObject *py = PyUnicode_DecodeUTF8(bptr, size, NULL);
-    if (size >= BSIZE)
-        free(bptr);
-    return py;
 }
 
 // iterated over our datastructure and create python from it
@@ -255,15 +229,15 @@ static PyMethodDef TMMDB_Class_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-DL_EXPORT(void) initMMDB(void)
+DL_EXPORT(void) initTMMDB(void)
 {
     PyObject *m, *d, *tmp;
     TMMDB_MMDBType.ob_type = &PyType_Type;
 
-    m = Py_InitModule("MMDB", TMMDB_Class_methods);
+    m = Py_InitModule("TMMDB", TMMDB_Class_methods);
     d = PyModule_GetDict(m);
 
-    PyMMDBError = PyErr_NewException("py_mmdb.error", NULL, NULL);
+    PyMMDBError = PyErr_NewException("py_tmmdb.error", NULL, NULL);
     PyDict_SetItemString(d, "error", PyMMDBError);
 
     tmp = PyInt_FromLong(TMMDB_MODE_STANDARD);
