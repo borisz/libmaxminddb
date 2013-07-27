@@ -39,12 +39,14 @@ extern "C" {
 
 #define TMMDB_DATASECTION_NOOP_SIZE (16)
 
-/* GEOIPDB flags */
-#define TMMDB_MODE_STANDARD (1)
-#define TMMDB_MODE_MEMORY_CACHE (2)
+/* flags */
+#define TMMDB_MODE_NOOP (0)
+#define TMMDB_MODE_STANDARD     TMMDB_MODE_NOOP
+#define TMMDB_MODE_MEMORY_CACHE TMMDB_MODE_NOOP
+#define TMMDB_MODE_MEMORY_MAP (3)
 #define TMMDB_MODE_MASK (7)
 
-/* GEOIPDB err codes */
+/* err codes */
 #define TMMDB_SUCCESS (0)
 #define TMMDB_OPENFILEERROR (-1)
 #define TMMDB_CORRUPTDATABASE (-2)
