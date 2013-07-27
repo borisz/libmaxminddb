@@ -1,14 +1,13 @@
 
 ## Public API ##
 
-    MMDB_open
-    MMDB_close
-    MMDB_lookupaddressX
-    MMDB_lookup_by_ipnum_128
-    MMDB_lookup_by_ipnum
-    MMDB_get_tree
-    MMDB_free_decode_all
-    MMDB_pread
+    TMMDB_open
+    TMMDB_close
+    TMMDB_lookupaddressX
+    TMMDB_lookup_by_ipnum_128
+    TMMDB_lookup_by_ipnum
+    TMMDB_get_tree
+    TMMDB_free_decode_all
 
 ## Getting started ##
 
@@ -16,97 +15,97 @@
 `#include <tinymmdb.h>`.
 
 It is recommended to browse the example CAPI for python in the pydemo directory.
-I would start with `MMDB_lookup_Py` in `py_libmaxmind.c` and go from there,
+I would start with `TMMDB_lookup_Py` in `py_libtinymmdb.c` and go from there,
 
 Use `python setup.py install` to install the code and ` python test.py` to run it.
 
 ## Function reference ##
 
-### `MMDB_s *MMDB_open(char *fname, uint32_t flags)` ###
+### `TMMDB_s *TMMDB_open(char *fname, uint32_t flags)` ###
 
 Open takes two arguments, the database filename typically xyz,mmdb and the operation mode.
-We support curently only two modes, the diskbased `MMDB_MODE_STANDARD` and the in memory mode `MMDB_MODE_MEMORY_CACHE`.
-`MMDB_MODE_STANDARD` is slower, but does not need much memory.
+We support curently only two modes, the diskbased `TMMDB_MODE_STANDARD` and the in memory mode `TMMDB_MODE_MEMORY_CACHE`.
+`TMMDB_MODE_STANDARD` is slower, but does not need much memory.
 
-The structure `MMDB_s` contains all information to search the database file. Please consider all fields readonly.
+The structure `TMMDB_s` contains all information to search the database file. Please consider all fields readonly.
 
-### `void MMDB_close(MMDB_s * mmdb)` ###
+### `void TMMDB_close(TMMDB_s * mmdb)` ###
 
 Free's all memory associated with the database and the filehandle.
 
-### `int MMDB_lookupaddressX(const char *addr, int ai_family, int ai_flags, void *ip)` ###
+### `int TMMDB_lookupaddressX(const char *addr, int ai_family, int ai_flags, void *ip)` ###
 
 Resolves the IP address addr into ip. ip is a pointer to `in_addr` or `in6_addr` depend on your inputs.
 
 For IPv4 it is probpaly 
 
-    status = MMDB_lookupaddressX( addr, AF_INET, 0, ip );
+    status = TMMDB_lookupaddressX( addr, AF_INET, 0, ip );
 
 If your database is IPv6 you should use
 
-    status = MMDB_lookupaddressX( addr, AF_INET6, AI_V4MAPPED, ip6 );
+    status = TMMDB_lookupaddressX( addr, AF_INET6, AI_V4MAPPED, ip6 );
 
 So any numeric input works like 24.24.24.24, ::24.24.24.24, ::ffff:24.24.24.24 or 2001:4860:b002::68
 
 The return value is gaierr ( man getaddrinfo ) or 0 on success.
 
-### `int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)` ###
+### `int TMMDB_lookup_by_ipnum_128(struct in6_addr ipnum, TMMDB_root_entry_s * result)` ###
 
-The `MMDB_lookup_by_ipnum_128` checks if the ipnumber usually created with a call to `MMDB_lookupaddressX` is part of the database.
+The `TMMDB_lookup_by_ipnum_128` checks if the ipnumber usually created with a call to `TMMDB_lookupaddressX` is part of the database.
 
     // initialize the root entry structure with the database
-    MMDB_root_entry_s root {.entry.mmdb = mmdb };
-    status = MMDB_lookup_by_ipnum_128(ip.v6, &root);
-    if ( status == MMDB_SUCCESS ) {
+    TMMDB_root_entry_s root {.entry.mmdb = mmdb };
+    status = TMMDB_lookup_by_ipnum_128(ip.v6, &root);
+    if ( status == TMMDB_SUCCESS ) {
         if (root.entry.offset ){
            // found something in the database
         }
     }
 
 The example initilsize our search structure with the database. Reuse the stucture if you want.
-The next line search the database for the ipnum. The result is always `MMDB_SUCCESS` unless somthing wired happened. Like out of memory or an io error.
-Note, that even a failed search return `MMDB_SUCCESS`.
+The next line search the database for the ipnum. The result is always `TMMDB_SUCCESS` unless somthing wired happened. Like out of memory or an io error.
+Note, that even a failed search return `TMMDB_SUCCESS`.
 
 `entry.offset > 0` indicates, that we found something.
 
-### `int MMDB_get_tree(entry_s * entry, MMDB_decode_all_s ** dec)` ###
+### `int TMMDB_get_tree(entry_s * entry, TMMDB_decode_all_s ** dec)` ###
 
-`MMDB_get_tree` preparse the database content into smaller easy peaces.
-Iterate over the `MMDB_decode_all_s` structure after this call.
-**Please notice**, you have to free the `MMDB_decode_all_s` structure 
-with `MMDB_free_decode_all` for every successful call to `MMDB_get_tree`.
+`TMMDB_get_tree` preparse the database content into smaller easy peaces.
+Iterate over the `TMMDB_decode_all_s` structure after this call.
+**Please notice**, you have to free the `TMMDB_decode_all_s` structure 
+with `TMMDB_free_decode_all` for every successful call to `TMMDB_get_tree`.
 
 The calling sequene looks like
 
-    MMDB_decode_all_s *decode_all;
-    status = MMDB_get_tree(&root.entry, &decode_all);
-    if ( status == MMDB_SUCCESS ){
+    TMMDB_decode_all_s *decode_all;
+    status = TMMDB_get_tree(&root.entry, &decode_all);
+    if ( status == TMMDB_SUCCESS ){
        // do something
-       MMDB_free_decode_all(decode_all);       
+       TMMDB_free_decode_all(decode_all);       
     }
 
- The `MMDB_decode_all_s` structure contains _one_ decoded entry, and an internal offset
+ The `TMMDB_decode_all_s` structure contains _one_ decoded entry, and an internal offset
  to the next entry to decode. This offset is only useful for the decode functions.
 
- The `MMDB_return_s` structure inside `MMDB_decode_s` is much more interesting, 
+ The `TMMDB_return_s` structure inside `TMMDB_decode_s` is much more interesting, 
  it contains the almost decoded data for all data types returning something.
 
-    MMDB_DTYPE_UTF8_STRING
-    MMDB_DTYPE_IEEE754_DOUBLE
-    MMDB_DTYPE_BYTES
-    MMDB_DTYPE_UINT16
-    MMDB_DTYPE_UINT32
-    MMDB_DTYPE_MAP
-    MMDB_DTYPE_INT32
-    MMDB_DTYPE_UINT64
-    MMDB_DTYPE_UINT128
-    MMDB_DTYPE_ARRAY
-    MMDB_DTYPE_BOOLEAN
-    MMDB_DTYPE_IEEE754_FLOAT
+    TMMDB_DTYPE_UTF8_STRING
+    TMMDB_DTYPE_IEEE754_DOUBLE
+    TMMDB_DTYPE_BYTES
+    TMMDB_DTYPE_UINT16
+    TMMDB_DTYPE_UINT32
+    TMMDB_DTYPE_MAP
+    TMMDB_DTYPE_INT32
+    TMMDB_DTYPE_UINT64
+    TMMDB_DTYPE_UINT128
+    TMMDB_DTYPE_ARRAY
+    TMMDB_DTYPE_BOOLEAN
+    TMMDB_DTYPE_IEEE754_FLOAT
 
-`MMDB_return_s` looks like:
+`TMMDB_return_s` looks like:
 
-    struct MMDB_return_s {
+    struct TMMDB_return_s {
         /* return values */
         union {
             float float_value;
@@ -122,78 +121,78 @@ The calling sequene looks like
         int type;
     };
 
-The sturcture is valid whenever `MMDB_return_s.offset > 0`.
-`MMDB_return_s.type` contains the type from above for example `MMDB_DTYPE_INT32`.
-and the value of the field. Sometimes the size, if it makes sense ( for `MMDB_DTYPE_BYTES`,`MMDB_DTYPE_UTF8_STRING`, `MMDB_DTYPE_ARRAY` and `MMDB_DTYPE_MAP` ).
+The sturcture is valid whenever `TMMDB_return_s.offset > 0`.
+`TMMDB_return_s.type` contains the type from above for example `TMMDB_DTYPE_INT32`.
+and the value of the field. Sometimes the size, if it makes sense ( for `TMMDB_DTYPE_BYTES`,`TMMDB_DTYPE_UTF8_STRING`, `TMMDB_DTYPE_ARRAY` and `TMMDB_DTYPE_MAP` ).
 
 
-#### `MMDB_DTYPE_UTF8_STRING`
+#### `TMMDB_DTYPE_UTF8_STRING`
 
-    type: MMDB_DTYPE_UTF8_STRING
+    type: TMMDB_DTYPE_UTF8_STRING
     data_size: is the length of the string in bytes
     ptr: is a pointer to the string in memory, or for diskbased databases an offset into the datasection of the file.
 
-#### `MMDB_DTYPE_IEEE754_DOUBLE`
+#### `TMMDB_DTYPE_IEEE754_DOUBLE`
 
-    type: MMDB_DTYPE_IEEE754_DOUBLE
+    type: TMMDB_DTYPE_IEEE754_DOUBLE
     double_value: contains the value
 
-#### `MMDB_DTYPE_BYTES`
+#### `TMMDB_DTYPE_BYTES`
     
-    type: MMDB_DTYPE_BYTES
+    type: TMMDB_DTYPE_BYTES
     data_size:  Length in bytes
     ptr: is a pointer to the string in memory, or for diskbased databases an offset into the datasection of the file.
 
-#### `MMDB_DTYPE_UINT16`
+#### `TMMDB_DTYPE_UINT16`
 
-    type: MMDB_DTYPE_UINT16
+    type: TMMDB_DTYPE_UINT16
     sinteger: contains the value
 
-#### `MMDB_DTYPE_UINT32`
+#### `TMMDB_DTYPE_UINT32`
 
-    type: MMDB_DTYPE_UINT32
+    type: TMMDB_DTYPE_UINT32
     uinteger: contains the value
 
-#### `MMDB_DTYPE_INT32`
+#### `TMMDB_DTYPE_INT32`
 
-    type: MMDB_DTYPE_INT32
+    type: TMMDB_DTYPE_INT32
     sinteger: contains the value
 
-#### `MMDB_DTYPE_INT64`
+#### `TMMDB_DTYPE_INT64`
 
-    type: MMDB_DTYPE_UINT64
+    type: TMMDB_DTYPE_UINT64
     c8: contains eight bytes in network order
 
-#### `MMDB_DTYPE_INT128`
+#### `TMMDB_DTYPE_INT128`
 
-    type: MMDB_DTYPE_UINT128
+    type: TMMDB_DTYPE_UINT128
     c16: contains 16 bytes in network order
 
-#### `MMDB_DTYPE_BOOLEAN`
-    type: MMDB_DTYPE_BOOLEAN
+#### `TMMDB_DTYPE_BOOLEAN`
+    type: TMMDB_DTYPE_BOOLEAN
     sinteger: contains the value
     
-#### `MMDB_DTYPE_MAP`
-    type: MMDB_DTYPE_MAP
+#### `TMMDB_DTYPE_MAP`
+    type: TMMDB_DTYPE_MAP
     data_size:  count key/value pairs in the dict
 
-#### `MMDB_DTYPE_ARRAY`
-    type: MMDB_DTYPE_ARRAY
+#### `TMMDB_DTYPE_ARRAY`
+    type: TMMDB_DTYPE_ARRAY
     data_size:  Length of the array
 
-#### `MMDB_DTYPE_IEEE754_FLOAT`
-    type: MMDB_DTYPE_IEEE754_FLOAT
+#### `TMMDB_DTYPE_IEEE754_FLOAT`
+    type: TMMDB_DTYPE_IEEE754_FLOAT
     double_value: contains the value
 
 
-### `void MMDB_free_decode_all(MMDB_decode_all_s * dec)` ###
+### `void TMMDB_free_decode_all(TMMDB_decode_all_s * dec)` ###
 
-Free all temporary used memory by `MMDB_decode_all_s` typical used after `MMDB_get_tree`
+Free all temporary used memory by `TMMDB_decode_all_s` typical used after `TMMDB_get_tree`
 
-### `int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)` ###
+### `int TMMDB_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)` ###
 
-MMDB_pread makes it easier for the user to read X bytes into a buffer,
+TMMDB_pread makes it easier for the user to read X bytes into a buffer,
 
-The return value is `MMDB_SUCCESS` for SUCCESS or `MMDB_IOERROR` on failure.
+The return value is `TMMDB_SUCCESS` for SUCCESS or `TMMDB_IOERROR` on failure.
 
 
