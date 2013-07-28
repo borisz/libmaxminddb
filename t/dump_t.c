@@ -13,7 +13,9 @@ int main(void)
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
 
-    TMMDB_s *mmdb = TMMDB_open(fname, TMMDB_MODE_MEMORY_CACHE);
+    TMMDB_s *mmdb;
+    int status = TMMDB_open(&mmdb, fname, TMMDB_MODE_MEMORY_CACHE);
+    ok(status == TMMDB_SUCCESS, "TMMDB_open successful (ERRCODE: SUCCESS)");
     ok(mmdb != NULL, "TMMDB_open successful");
     if (mmdb) {
 

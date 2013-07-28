@@ -7,8 +7,6 @@
 staticforward PyTypeObject TMMDB_MMDBType;
 static PyObject *mkobj_r(TMMDB_s * mmdb, TMMDB_decode_all_s ** current);
 
-
-
 /* Exception object for python */
 static PyObject *PyMMDBError;
 
@@ -16,7 +14,6 @@ typedef struct {
     PyObject_HEAD               /* no semicolon */
     TMMDB_s * mmdb;
 } TMMDB_MMDBObject;
-
 
 // Create a new Python MMDB object
 static PyObject *TMMDB_new_Py(PyObject * self, PyObject * args)
@@ -33,8 +30,8 @@ static PyObject *TMMDB_new_Py(PyObject * self, PyObject * args)
     if (!obj)
         return NULL;
 
-    obj->mmdb = TMMDB_open(filename, flags);
-    if (!obj->mmdb) {
+    int status = TMMDB_open(&obj->mmdb, filename, flags);
+    if (status == TMMDB_SUCCESS && !obj->mmdb) {
         PyErr_SetString(PyMMDBError, "Can't create obj->mmdb object");
         Py_DECREF(obj);
         return NULL;
@@ -93,19 +90,17 @@ static PyObject *TMMDB_lookup_Py(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
-
-
 // minor helper fuction to create a python string from the database
 static PyObject *build_PyString_FromStringAndSize(TMMDB_s * mmdb, void *ptr,
                                                   int size)
 {
-        return PyString_FromStringAndSize(ptr, size);
+    return PyString_FromStringAndSize(ptr, size);
 }
 
 // minor helper fuction to create a python string from the database
 static PyObject *build_PyUnicode_DecodeUTF8(TMMDB_s * mmdb, void *ptr, int size)
 {
-        return PyUnicode_DecodeUTF8(ptr, size, NULL);
+    return PyUnicode_DecodeUTF8(ptr, size, NULL);
 }
 
 // iterated over our datastructure and create python from it
@@ -123,9 +118,7 @@ static PyObject *mkobj_r(TMMDB_s * mmdb, TMMDB_decode_all_s ** current)
                 void *key_ptr = size ? (void *)(*current)->decode.data.ptr : "";
                 *current = (*current)->next;
                 val = mkobj_r(mmdb, current);
-                key =
-                    build_PyString_FromStringAndSize(mmdb, key_ptr,
-                                                     key_size);
+                key = build_PyString_FromStringAndSize(mmdb, key_ptr, key_size);
                 PyDict_SetItem(hv, key, val);
                 Py_DECREF(val);
                 Py_DECREF(key);
@@ -148,7 +141,7 @@ static PyObject *mkobj_r(TMMDB_s * mmdb, TMMDB_decode_all_s ** current)
     case TMMDB_DTYPE_UTF8_STRING:
         {
             int size = (*current)->decode.data.data_size;
-            void *ptr = size ? (void*)(*current)->decode.data.ptr : "";
+            void *ptr = size ? (void *)(*current)->decode.data.ptr : "";
             sv = build_PyUnicode_DecodeUTF8(mmdb, ptr, size);
         }
         break;
@@ -156,8 +149,8 @@ static PyObject *mkobj_r(TMMDB_s * mmdb, TMMDB_decode_all_s ** current)
         {
             int size = (*current)->decode.data.data_size;
             sv = build_PyString_FromStringAndSize(mmdb,
-                                                  (void *)(*current)->
-                                                  decode.data.ptr, size);
+                                                  (void *)(*current)->decode.
+                                                  data.ptr, size);
         }
         break;
     case TMMDB_DTYPE_IEEE754_FLOAT:
@@ -171,13 +164,13 @@ static PyObject *mkobj_r(TMMDB_s * mmdb, TMMDB_decode_all_s ** current)
         break;
     case TMMDB_DTYPE_UINT64:
         sv = build_PyString_FromStringAndSize(mmdb,
-                                              (void *)(*current)->decode.
-                                              data.c8, 8);
+                                              (void *)(*current)->decode.data.
+                                              c8, 8);
         break;
     case TMMDB_DTYPE_UINT128:
         sv = build_PyString_FromStringAndSize(mmdb,
-                                              (void *)(*current)->decode.
-                                              data.c16, 16);
+                                              (void *)(*current)->decode.data.
+                                              c16, 16);
         break;
     case TMMDB_DTYPE_BOOLEAN:
     case TMMDB_DTYPE_UINT16:
@@ -210,9 +203,9 @@ static PyTypeObject TMMDB_MMDBType = {
     "MMDB",
     sizeof(TMMDB_MMDBObject),
     0,
-    TMMDB_MMDB_dealloc,          /*tp_dealloc */
+    TMMDB_MMDB_dealloc,         /*tp_dealloc */
     0,                          /*tp_print */
-    (getattrfunc) TMMDB_GetAttr, /*tp_getattr */
+    (getattrfunc) TMMDB_GetAttr,        /*tp_getattr */
     0,                          /*tp_setattr */
     0,                          /*tp_compare */
     0,                          /*tp_repr */

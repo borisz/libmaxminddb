@@ -5,15 +5,20 @@
 
 int main(void)
 {
+    TMMDB_s *mmdb_m, *mmdb_s;
     char *fname = get_test_db_fname();
     struct stat sstat;
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
 
-    TMMDB_s *mmdb_m = TMMDB_open(fname, TMMDB_MODE_MEMORY_CACHE);
+    int status = TMMDB_open(&mmdb_m, fname, TMMDB_MODE_MEMORY_CACHE);
+    ok(status == TMMDB_SUCCESS,
+       "TMMDB_open successful ( TMMDB_MODE_MEMORY_CACHE ERRCODE: SUCCESS)");
     ok(mmdb_m != NULL, "TMMDB_open successful ( TMMDB_MODE_MEMORY_CACHE )");
 
-    TMMDB_s *mmdb_s = TMMDB_open(fname, TMMDB_MODE_STANDARD);
+    status = TMMDB_open(&mmdb_s, fname, TMMDB_MODE_STANDARD);
+    ok(status == TMMDB_SUCCESS,
+       "TMMDB_open successful ( TMMDB_MODE_STANDARD ERRCODE: SUCCESS)");
     ok(mmdb_s != NULL, "TMMDB_open successful ( TMMDB_MODE_STANDARD )");
 
     if (mmdb_m && mmdb_s) {

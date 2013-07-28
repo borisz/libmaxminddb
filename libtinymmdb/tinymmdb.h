@@ -25,7 +25,7 @@ extern "C" {
 #define TMMDB_DTYPE_BYTES (4)
 #define TMMDB_DTYPE_UINT16 (5)
 #define TMMDB_DTYPE_UINT32 (6)
-#define TMMDB_DTYPE_MAP (7)      /* HASH */
+#define TMMDB_DTYPE_MAP (7)     /* HASH */
 #define TMMDB_DTYPE_INT32 (8)
 #define TMMDB_DTYPE_UINT64 (9)
 #define TMMDB_DTYPE_UINT128 (10)
@@ -102,7 +102,7 @@ extern "C" {
         const uint8_t *dataptr;
         uint8_t *meta_data_content;
         struct TMMDB_s *fake_metadata_db;
-        TMMDB_entry_s meta;      // should change to entry_s
+        TMMDB_entry_s meta;     // should change to entry_s
     } TMMDB_s;
 
 // this is the result for every field
@@ -135,28 +135,29 @@ extern "C" {
         struct TMMDB_decode_all_s *next;
     } TMMDB_decode_all_s;
 
-    extern TMMDB_s *TMMDB_open(const char *fname, uint32_t flags);
+    extern int TMMDB_open(TMMDB_s ** mmdbp, const char *fname, uint32_t flags);
     extern void TMMDB_close(TMMDB_s * mmdb);
     extern int TMMDB_lookup_by_ipnum(uint32_t ipnum, TMMDB_root_entry_s * res);
     extern int TMMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
-                                        TMMDB_root_entry_s * result);
+                                         TMMDB_root_entry_s * result);
 
     extern int TMMDB_get_value(TMMDB_entry_s * start, TMMDB_return_s * result,
-                              ...);
+                               ...);
     extern int TMMDB_strcmp_result(TMMDB_s * mmdb,
-                                  TMMDB_return_s const *const result, char *str);
+                                   TMMDB_return_s const *const result,
+                                   char *str);
 
     extern const char *TMMDB_lib_version(void);
 
     extern int TMMDB_dump(TMMDB_s * mmdb, TMMDB_decode_all_s * decode_all,
-                         int indent);
+                          int indent);
     extern int TMMDB_get_tree(TMMDB_entry_s * start,
-                             TMMDB_decode_all_s ** decode_all);
+                              TMMDB_decode_all_s ** decode_all);
     extern TMMDB_decode_all_s *TMMDB_alloc_decode_all(void);
     extern void TMMDB_free_decode_all(TMMDB_decode_all_s * freeme);
 
     extern int TMMDB_lookupaddressX(const char *host, int ai_family,
-                                   int ai_flags, void *ip);
+                                    int ai_flags, void *ip);
 
 #ifdef __cplusplus
 }

@@ -37,10 +37,11 @@ int main(int argc, char *const argv[])
     assert(fname != NULL);
 
     //TMMDB_s *mmdb = TMMDB_open(fname, TMMDB_MODE_MEMORY_CACHE);
-    TMMDB_s *mmdb = TMMDB_open(fname, TMMDB_MODE_STANDARD);
+    TMMDB_s *mmdb;
+    int err = TMMDB_open(&mmdb, fname, TMMDB_MODE_STANDARD);
 
-    if (!mmdb) {
-        fprintf(stderr, "Can't open %s\n", fname);
+    if (err == TMMDB_SUCCESS) {
+        fprintf(stderr, "Can't open %s ( %d )\n", fname, err);
         exit(1);
     }
 
@@ -56,7 +57,7 @@ int main(int argc, char *const argv[])
     int ai_flags = AI_V4MAPPED;
 
     if (ipstr == NULL || 0 != TMMDB_lookupaddressX(ipstr, ai_family, ai_flags,
-                                                  &ip)) {
+                                                   &ip)) {
         fprintf(stderr, "Invalid IP\n");
         exit(1);
     }

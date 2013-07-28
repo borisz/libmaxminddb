@@ -29,12 +29,13 @@ LOCAL void DPRINT_KEY(TMMDB_s * mmdb, TMMDB_return_s * data);
 LOCAL uint32_t get_uint_value(TMMDB_entry_s * start, ...);
 LOCAL void skip_hash_array(TMMDB_s * mmdb, TMMDB_decode_s * decode);
 
-LOCAL int get_tree(TMMDB_s * mmdb, uint32_t offset, TMMDB_decode_all_s * decode);
+LOCAL int get_tree(TMMDB_s * mmdb, uint32_t offset,
+                   TMMDB_decode_all_s * decode);
 int TMMDB_vget_value(TMMDB_entry_s * start, TMMDB_return_s * result,
-                    va_list params);
+                     va_list params);
 
 LOCAL TMMDB_decode_all_s *dump(TMMDB_s * mmdb, TMMDB_decode_all_s * decode_all,
-                              int indent);
+                               int indent);
 
 #if !defined HAVE_MEMMEM
 LOCAL void *memmem(const void *big, size_t big_len, const void *little,
@@ -71,7 +72,8 @@ LOCAL inline void *xmalloc(size_t size)
     return p;
 }
 
-int TMMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
+int TMMDB_lookupaddressX(const char *host, int ai_family, int ai_flags,
+                         void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
         .ai_flags = ai_flags,
@@ -206,7 +208,7 @@ LOCAL char *bytesdup(TMMDB_return_s const *const ret)
 
 // 0 match like strcmp
 int TMMDB_strcmp_result(TMMDB_s * mmdb, TMMDB_return_s const *const result,
-                       char *str)
+                        char *str)
 {
     if (result->offset > 0) {
         const char *p = result->ptr;
@@ -266,7 +268,8 @@ LOCAL void free_all(TMMDB_s * mmdb)
 #define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res) \
 	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
-int TMMDB_lookup_by_ipnum_128(struct in6_addr ipnum, TMMDB_root_entry_s * result)
+int TMMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
+                              TMMDB_root_entry_s * result)
 {
     TMMDB_s *mmdb = result->entry.mmdb;
 
@@ -317,7 +320,7 @@ int TMMDB_lookup_by_ipnum(uint32_t ipnum, TMMDB_root_entry_s * res)
     TMMDB_s *mmdb = res->entry.mmdb;
 
     TMMDB_DBG_CARP("TMMDB_lookup_by_ipnum{mmdb} fd:%d depth:%d node_count:%d\n",
-                  mmdb->fd, mmdb->depth, mmdb->node_count);
+                   mmdb->fd, mmdb->depth, mmdb->node_count);
     TMMDB_DBG_CARP("TMMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
 
     int segments = mmdb->node_count;
@@ -427,15 +430,16 @@ LOCAL int init(TMMDB_s * mmdb, const char *fname, uint32_t flags)
     return TMMDB_SUCCESS;
 }
 
-TMMDB_s *TMMDB_open(const char *fname, uint32_t flags)
+int TMMDB_open(TMMDB_s ** mmdbptr, const char *fname, uint32_t flags)
 {
     TMMDB_DBG_CARP("TMMDB_open %s %d\n", fname, flags);
-    TMMDB_s *mmdb = xcalloc(1, sizeof(TMMDB_s));
-    if (TMMDB_SUCCESS != init(mmdb, fname, flags)) {
+    TMMDB_s *mmdb = *mmdbptr = xcalloc(1, sizeof(TMMDB_s));
+    int err = init(mmdb, fname, flags);
+    if (err != TMMDB_SUCCESS) {
         free_all(mmdb);
-        return NULL;
+        *mmdbptr = NULL;
     }
-    return mmdb;
+    return err;
 }
 
 void TMMDB_close(TMMDB_s * mmdb)
@@ -708,7 +712,7 @@ LOCAL void silly_pindent(int i)
 }
 
 LOCAL TMMDB_decode_all_s *dump(TMMDB_s * mmdb, TMMDB_decode_all_s * decode_all,
-                              int indent)
+                               int indent)
 {
     switch (decode_all->decode.data.type) {
     case TMMDB_DTYPE_MAP:
@@ -765,7 +769,7 @@ LOCAL TMMDB_decode_all_s *dump(TMMDB_s * mmdb, TMMDB_decode_all_s * decode_all,
         break;
     default:
         TMMDB_DBG_CARP("decode_one UNIPLEMENTED type:%d\n",
-                      decode_all->decode.data.type);
+                       decode_all->decode.data.type);
         assert(0);
     }
     return decode_all;
@@ -794,7 +798,7 @@ LOCAL void decode_one_follow(TMMDB_s * mmdb, uint32_t offset,
 }
 
 int TMMDB_vget_value(TMMDB_entry_s * start, TMMDB_return_s * result,
-                    va_list params)
+                     va_list params)
 {
     TMMDB_decode_s decode, key, value;
     TMMDB_s *mmdb = start->mmdb;

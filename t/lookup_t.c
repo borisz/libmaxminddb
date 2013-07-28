@@ -81,7 +81,7 @@ void test_mmdb(TMMDB_s * mmdb)
             TMMDB_return_s military, cellular, flt, dbl;
 
             TMMDB_get_value(&root.entry, &military, "traits", "is_military",
-                           NULL);
+                            NULL);
             ok(military.offset != 0, "traits/is_military _is_ found for %s",
                ipstr);
 
@@ -100,7 +100,7 @@ void test_mmdb(TMMDB_s * mmdb)
             ok(cellular.uinteger == 1, "traits/is_cellular _is_ 1");
 
             TMMDB_get_value(&root.entry, &flt, "test_data", "max", "float_t",
-                           NULL);
+                            NULL);
             ok(flt.offset != 0, "test_data/max/float_t _is_ found for %s",
                ipstr);
 
@@ -111,7 +111,7 @@ void test_mmdb(TMMDB_s * mmdb)
                "test_data/max/float_t _is_ nearly 9999.99");
 
             TMMDB_get_value(&root.entry, &dbl, "test_data", "max", "double_t",
-                           NULL);
+                            NULL);
             ok(dbl.offset != 0, "test_data/max/double_t _is_ found for %s",
                ipstr);
 
@@ -124,13 +124,15 @@ void test_mmdb(TMMDB_s * mmdb)
             {
                 double expect[] =
                     { 0.000000, 0.000000, 1.000000, 0.100000, 0.123000,
-          10.000000, 7.990000, 1000000000.000000, -1.000000, -0.100000,
-          -0.123000, -10.000000, -7.990000, -1000000000.000000 };
+                    10.000000, 7.990000, 1000000000.000000, -1.000000,
+                        -0.100000,
+                    -0.123000, -10.000000, -7.990000, -1000000000.000000
+                };
                 int cnt = sizeof(expect) / sizeof(double);
 
                 TMMDB_return_s got;
                 TMMDB_get_value(&root.entry, &dbl, "test_data", "tst",
-                               "array_ieee754_double_t", NULL);
+                                "array_ieee754_double_t", NULL);
                 ok(dbl.offset > 0, "Found it");
 
                 if (dbl.offset > 0) {
@@ -168,14 +170,20 @@ int main(void)
         int err = stat(fname, &sstat);
         ok(err == 0, "%s exists", fname);
 
-        TMMDB_s *mmdb_m = TMMDB_open(fname, TMMDB_MODE_MEMORY_CACHE);
+        TMMDB_s *mmdb_m;
+        int status = TMMDB_open(&mmdb_m, fname, TMMDB_MODE_MEMORY_CACHE);
+        ok(status == TMMDB_SUCCESS,
+           "TMMDB_open successful ( TMMDB_MODE_MEMORY_CACHE ERRCODE: SUCCESS)");
         ok(mmdb_m != NULL, "TMMDB_open successful ( TMMDB_MODE_MEMORY_CACHE )");
         if (mmdb_m) {
             test_mmdb(mmdb_m);
             TMMDB_close(mmdb_m);
         }
 
-        TMMDB_s *mmdb_s = TMMDB_open(fname, TMMDB_MODE_STANDARD);
+        TMMDB_s *mmdb_s;
+        status = TMMDB_open(&mmdb_s, fname, TMMDB_MODE_STANDARD);
+        ok(status == TMMDB_SUCCESS,
+           "TMMDB_open successful ( TMMDB_MODE_STANDARD ERRCODE: SUCCESS)");
         ok(mmdb_s != NULL, "TMMDB_open successful ( TMMDB_MODE_STANDARD )");
         if (mmdb_s) {
             test_mmdb(mmdb_s);
