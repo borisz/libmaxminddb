@@ -40,7 +40,7 @@ int main(int argc, char *const argv[])
     TMMDB_s *mmdb;
     int err = TMMDB_open(&mmdb, fname, TMMDB_MODE_STANDARD);
 
-    if (err == TMMDB_SUCCESS) {
+    if (err != TMMDB_SUCCESS) {
         fprintf(stderr, "Can't open %s ( %d )\n", fname, err);
         exit(1);
     }
