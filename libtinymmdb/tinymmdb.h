@@ -156,8 +156,8 @@ extern "C" {
     extern TMMDB_decode_all_s *TMMDB_alloc_decode_all(void);
     extern void TMMDB_free_decode_all(TMMDB_decode_all_s * freeme);
 
-    extern int TMMDB_lookupaddressX(const char *host, int ai_family,
-                                    int ai_flags, void *ip);
+    extern int TMMDB_resolve_address(const char *host, int ai_family,
+                                     int ai_flags, void *ip);
 
 #ifdef __cplusplus
 }

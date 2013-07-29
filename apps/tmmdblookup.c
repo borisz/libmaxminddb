@@ -63,11 +63,7 @@ int main(int argc, char *const argv[])
     }
 
     TMMDB_root_entry_s root = {.entry.mmdb = mmdb };
-<<<<<<< HEAD
     status = is_ipv4(mmdb)
-=======
-    int status = is_ipv4(mmdb)
->>>>>>> Rename library to libtinymmdb
         ? TMMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)
         : TMMDB_lookup_by_ipnum_128(ip.v6, &root);
 
