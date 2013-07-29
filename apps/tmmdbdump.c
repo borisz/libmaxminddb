@@ -56,8 +56,8 @@ int main(int argc, char *const argv[])
     int ai_family = is_ipv4(mmdb) ? AF_INET : AF_INET6;
     int ai_flags = AI_V4MAPPED;
 
-    if (ipstr == NULL || 0 != TMMDB_lookupaddressX(ipstr, ai_family, ai_flags,
-                                                  &ip)) {
+    if (ipstr == NULL || 0 != TMMDB_resolve_address(ipstr, ai_family, ai_flags,
+                                                    &ip)) {
         fprintf(stderr, "Invalid IP\n");
         exit(1);
     }
