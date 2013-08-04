@@ -89,7 +89,6 @@ extern "C" {
 // information about the database file.
     typedef struct TMMDB_s {
         uint32_t flags;
-        int fd;
         int size;               // file size
         char *fname;
         const uint8_t *file_in_mem_ptr;

@@ -245,8 +245,6 @@ LOCAL void free_all(TMMDB_s * mmdb)
             free(mmdb->fname);
         if (mmdb->file_in_mem_ptr)
             munmap((void *)mmdb->file_in_mem_ptr, mmdb->size);
-        if (mmdb->fd >= 0)
-            close(mmdb->fd);
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
@@ -319,9 +317,9 @@ int TMMDB_lookup_by_ipnum(uint32_t ipnum, TMMDB_root_entry_s * res)
 {
     TMMDB_s *mmdb = res->entry.mmdb;
 
-    TMMDB_DBG_CARP("TMMDB_lookup_by_ipnum{mmdb} fd:%d depth:%d node_count:%d\n",
-                   mmdb->fd, mmdb->depth, mmdb->node_count);
-    TMMDB_DBG_CARP("TMMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
+    TMMDB_DBG_CARP("TMMDB_lookup_by_ipnum{mmdb} depth:%d node_count:%d\n",
+                   mmdb->depth, mmdb->node_count);
+    TMMDB_DBG_CARP("TMMDB_lookup_by_ipnum ip:%u\n", ipnum);
 
     int segments = mmdb->node_count;
     uint32_t offset = 0;
@@ -367,14 +365,13 @@ int TMMDB_lookup_by_ipnum(uint32_t ipnum, TMMDB_root_entry_s * res)
 LOCAL int init(TMMDB_s * mmdb, const char *fname, uint32_t flags)
 {
     struct stat s;
-    int fd;
     uint8_t *ptr;
     ssize_t size;
     off_t offset;
     mmdb->fname = strdup(fname);
     if (mmdb->fname == NULL)
         return TMMDB_OUTOFMEMORY;
-    mmdb->fd = fd = open(fname, O_RDONLY);
+    int fd = open(fname, O_RDONLY);
 
     if (fd < 0)
         return TMMDB_OPENFILEERROR;
@@ -384,7 +381,7 @@ LOCAL int init(TMMDB_s * mmdb, const char *fname, uint32_t flags)
     offset = 0;
     ptr = mmdb->meta_data_content =
         mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
-
+    close(fd);
     if (ptr == MAP_FAILED)
         return TMMDB_INVALIDDATABASE;
 
@@ -397,7 +394,6 @@ LOCAL int init(TMMDB_s * mmdb, const char *fname, uint32_t flags)
     }
 
     mmdb->fake_metadata_db = xcalloc(1, sizeof(struct TMMDB_s));
-    mmdb->fake_metadata_db->fd = -1;
     mmdb->fake_metadata_db->dataptr = metadata + 14;
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
