@@ -72,7 +72,7 @@ LOCAL inline void *xmalloc(size_t size)
     return p;
 }
 
-int TMMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
+int TMMDB_resolve_address(const char *host, int ai_family, int ai_flags, void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
         .ai_flags = ai_flags,
