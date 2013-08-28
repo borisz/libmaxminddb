@@ -9,7 +9,7 @@ before_script:
   - make
 
 script:
-  - make check
+  - TMMDB_TEST_DATABASE=`pwd`/t/data/v6-28.mmdb make check
 
 notifications:
   email:
